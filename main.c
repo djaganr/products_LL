@@ -33,7 +33,7 @@ void findProduct(struct node *head, char name[100]){
 }
 
 // Add product 
-void addingProduct(struct node *head, char name[100], double price ){
+void addingProduct(struct node *head, int id ,char name[100], double price ){
     struct node * current = head;
 
     while (current->next != NULL){
@@ -41,7 +41,7 @@ void addingProduct(struct node *head, char name[100], double price ){
     }
 
     current->next = (struct node *)malloc(sizeof(struct node));
-    current->next->id = current->id+1;
+    current->next->id = id;
     strcpy(current->next->name, name);
     current->next->price = price;
 }
@@ -81,6 +81,32 @@ void updateProduct(struct node *head,int id ,char name[100], double price ){
     
 }
 
+void saveToFile(struct node* head) {
+    struct node * current = head;
+
+    FILE* file = fopen("products.txt", "w"); // write
+    while (current != NULL) {
+        fprintf(file, "%d, %s, %f \n", current->id, current->name, current->price);
+        current = current->next;
+    }
+    fclose(file);
+}
+
+void readFromFile(struct node* head) {
+    FILE* file = fopen("products.txt", "r");
+
+    char line[300];
+    while (fgets(line, 300, file)) {
+        int id;
+        char name[300];
+        double price;
+        sscanf(line, "%d %s, %lf", &id, name, &price);
+        addingProduct(head, id, name, price );
+    }
+    fclose(file);
+}
+
+
 
 
 int main() {
@@ -112,11 +138,13 @@ int main() {
     printf("Add a Product?:");
     scanf(" %c", &Decision);
     if(Decision=='Y'){
+        printf("Enter id:");
+        scanf("%d", &productId);
         printf("Enter name:");
         scanf("%s", productName);
         printf("enter price:");
         scanf("%lf", &productPrice);
-        addingProduct(head, productName, productPrice);
+        addingProduct(head, productId, productName, productPrice);
         Decision = 'N';
     }
 
@@ -162,6 +190,7 @@ int main() {
 
 
     printProducts(head);
+    saveToFile(head);
 
     return 0;
 }
